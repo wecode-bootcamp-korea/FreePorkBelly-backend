@@ -1,7 +1,7 @@
 from django.db import models
 
 class Customer(models.Model):
-    email    = models.CharField(max_length=50)
+    email    = models.EmailField(max_length=50)
     password = models.CharField(max_length=300) 
     name     = models.CharField(max_length=300)
     phone    = models.CharField(max_length=50)
@@ -18,13 +18,12 @@ class DeliveryAddress(models.Model):
     address  = models.CharField(max_length=300)
 
     class Meta:
-        db_table = 'delivery_address'
+        db_table = 'delivery_addresses'
 
 class Coupon(models.Model):
-    created_at   = models.DateTimeField(auto_now_add=True)
     name         = models.CharField(max_length=200)
     condition    = models.CharField(max_length=500)
-    issued_at    = models.DateTimeField() 
+    issued_at    = models.DateTimeField(auto_now_add=True) 
     expired_date = models.DateTimeField()
     discount     = models.DecimalField(max_digits=10, decimal_places=2)
     status       = models.CharField(max_length=50)
@@ -33,17 +32,18 @@ class Coupon(models.Model):
         db_table = 'coupons'
 
 class CouponCustomer(models.Model):
-    coupon   = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True)
-    customer = models.ForeignKey('Customer', on_delete=models.SET_NULL, null=True)
+    coupon     = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True)
+    customer   = models.ForeignKey('Customer', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'coupon_customers'
 
 class Point(models.Model):
     customer   = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     comment    = models.CharField(max_length=45)
-    amount     = models.DecimalField(max_digits=10, decimal_places=2)
+    amount     = models.DecimalField(max_digits=10, decimal_places=0)
 
     class Meta:
         db_table = 'points'

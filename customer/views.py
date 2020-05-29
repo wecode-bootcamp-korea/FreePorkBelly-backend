@@ -6,6 +6,7 @@ from django.views import View
 from django.http  import HttpResponse, JsonResponse
 
 from .models import Customer
+import my_settings
 
 class SignUpView(View):
     def post(self, request):
@@ -32,11 +33,10 @@ class SignInView(View):
                     user = Customer.objects.get(email=data['email'])
 
                     if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
-                        token = jwt.encode({'email':data['email']},'SECRET',algorithm='HS256').decode('utf-8')
+                        token = jwt.encode({'email':data['email']},my_settings.SECRET_KEY,my_settings.ALGORITHM).decode('utf-8')
                         return JsonResponse({'token':token},status=200)
                     return HttpResponse(status=401)
             return HttpResponse(status=401)
-
         except KeyError:
 
             return JsonResponse({"message": "INVALID_KEYS"}, status=400)
