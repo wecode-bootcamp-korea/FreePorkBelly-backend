@@ -3,7 +3,7 @@ import django
 import csv
 import sys
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "freeporkbelly_main.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "freeporkbelly_main.settings")  # 프로젝트명.settings
 django.setup()
 
 from product.models import Category, Product, ProductDescription, Option, OptionItems
