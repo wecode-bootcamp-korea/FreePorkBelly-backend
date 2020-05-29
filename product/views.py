@@ -7,21 +7,40 @@ from product.models   import (
     Category, Product, ProductDescription, 
     Review, Option, OptionItems)
 
-# from django.shortcuts import render
+from django.shortcuts import render
 
-# class CategoryView(View):
-#     def get(self, request, category_id):
+class CategoryView(View):
+    def get(self, request, category_id):
 
-#         try:
-#             category = Category.objects.get(id=category_id) # 빈값 처리 방법 필요
-#             products = 
+        try:
+            
+            if category_id == 0:                  # 0일 때는 실행되나, category_id가 빈 값일 때는 에러 발생
+                category_info = {
+                    'name' : "전체보기",
+                    'image_url' : "https://www.jeongyookgak.com/assets/list/01.png"
+                }
 
-#             category_info = {
-#                 'name' : category.name,
-#                 'image_url' : category.image_url,
-#             }
+                products = Product.objects.all()
+            else:
+                category = Category.objects.get(id=category_id)
+                products = Product.objects.filter(category_id=category_id)
 
-#             return JsonResponse({'category_info' : category_info}, status=200)
+                category_info = {
+                    'name' : category.name,
+                    'image_url' : category.image_url
+                }
+            # product_info는 좀 수정이 필요해 보임.
+            products_info = [{
+                    'name' : product.name,
+                    'unit_price_comment' : product.unit_price_comment,
+                    'sales_price_comment' : product.sales_price_comment,
+                    'sub_img_url' : product.sub_img_url
+                } for product in products]
+
+            return JsonResponse({'category_info' : category_info, 'products_info' : products_info}, status=200)
+        
+        except Category.DoesNotExist:
+            return JsonResponse({'message' : "INVALID_CATEGORY_ID"})
 
 
 class ProductView(View):
