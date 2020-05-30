@@ -29,8 +29,6 @@ class SignUpView(View):
         except KeyError:
             return JsonResponse({"message": "INVALID_KEYS"}, status=400)
         # except IntegrityError:
-        #     return JsonResponse({'message':'Already registered username'}, status=400)
-        # except IntegrityError:
         #     return JsonResponse({'message':'Already registered email'}, status=400)
         
 
