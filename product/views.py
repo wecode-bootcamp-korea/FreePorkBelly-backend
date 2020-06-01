@@ -71,7 +71,7 @@ class ProductView(View):
             # 옵션사항 리스트로 가져오기
             option_id = product.option.id
             options = product.option.optionitems_set.filter(option_id = option_id)
-            option_list = [option.name for option in options]
+            option_list = [{'option_id' : option.id, 'option_name' : option.name} for option in options]
             
             # ProductDetail 설명 파트에서 사용될 이미지 리스트 가져오기
             desc_imgs = product.productdescription_set.all()

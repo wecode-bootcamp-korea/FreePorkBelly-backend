@@ -2,7 +2,7 @@ import json
 from django.views     import View
 from django.http      import HttpResponse, JsonResponse
 
-from customer.models  import Customer
+from customer.models  import Customer, DeliveryAddress
 from product.models   import (
     Category, Product, ProductDescription, 
     Review, Option, OptionItems)
@@ -58,7 +58,7 @@ class CartView(View):
             } for cart_item in cart_items
         ]
 
-        return JsonResponse({'data' : list(data)}, status=200)
+        return JsonResponse({'data' : data}, status=200)
 
     #@login_decorator
     def delete(self, request):
@@ -68,5 +68,44 @@ class CartView(View):
         CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id']).delete()
 
         return HttpResponse(status=200)
+
+
+class AddressView(View):
+    
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+
+            DeliveryAddress(
+                customer_id = request.GET.get('customer_id'),   #parameter로 받을 것과 POST로 받을 것 정해야 함.
+                name = data['name'],
+                phone = data['phone'],
+                address = data['address']
+            ).save()
+
+            return HttpResponse(status=200)
         
+        except KeyError:
+            return HttpResponse(status=400)
         
+    def get(self, request):
+        delivery_addresses = DeliveryAddress.objects.filter(customer_id=request.GET.get('customer_id'))
+
+        data = [
+            {
+                'address_id' : delivery_address.id,
+                'name' : delivery_address.name,
+                'phone' : delivery_address.phone,
+                'address' : delivery_address.address
+            } for delivery_address in delivery_addresses
+        ]
+
+        return JsonResponse({'data' : data}, status=200)
+
+    def delete(self, request):
+        address_id = request.GET.get('address_id')
+
+        DeliveryAddress.objects.get(id=address_id).delete()
+
+        return HttpResponse(status=200)
+
