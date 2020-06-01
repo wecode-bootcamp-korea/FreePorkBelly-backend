@@ -59,8 +59,8 @@ class CartView(View):
     #@login_decorator
     def delete(self, request):
         data = json.loads(request.body)
-        cart = Cart.objects.filter(customer_id=request.customer.id).last()
-
+        
+        cart = Cart.objects.filter(customer_id=data['customer_id']).last()
         CartItems.objects.filter(cart_id=cart.id, product_id=data['product_id']).delete()
 
         return HttpResponse(status=200)
