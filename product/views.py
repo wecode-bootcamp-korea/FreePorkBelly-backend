@@ -31,6 +31,7 @@ class CategoryView(View):
                 }
             # product_info는 좀 수정이 필요해 보임.
             products_info = [{
+                    'product_id' : product.category_id,
                     'name' : product.name,
                     'unit_price_comment' : product.unit_price_comment,
                     'sales_price_comment' : product.sales_price_comment,
