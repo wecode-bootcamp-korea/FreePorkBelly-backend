@@ -13,7 +13,7 @@ class SignUpView(View):
 
         try:
             if Customer.objects.filter(email=data['email']).exists():
-                return JsonResponse({'message':'Already registered email'}, status=400)
+                return JsonResponse({'message':'EMAIL_ALREADY_EXIST'}, status=400)
 
             hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             
@@ -24,8 +24,6 @@ class SignUpView(View):
                 phone=data['phone']
             )
             return HttpResponse(status=200)
-        except TypeError:
-            return JsonResponse({'message':'INVALID INPUT'}, status=400)
         except KeyError:
             return JsonResponse({"message": "INVALID_KEYS"}, status=400)
         

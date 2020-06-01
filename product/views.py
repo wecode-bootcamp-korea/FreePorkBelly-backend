@@ -12,7 +12,9 @@ from django.shortcuts import render
 
 class MainView(View):
     def get(self, request):
-        products = Product.objects.all()[0:6]    # 프로덕트 중에서 6개만 뽑음
+        
+        PRODUCT_MAIN_LIMIT = 6                   # 메인페이지에 6개 상품만 보여줌
+        products = Product.objects.all()[0:PRODUCT_MAIN_LIMIT]
 
         data = [{
             'product_id' : product.category_id,
@@ -45,7 +47,7 @@ class CategoryView(View):
                     'name' : category.name,
                     'image_url' : category.image_url
                 }
-            # product_info는 좀 수정이 필요해 보임.
+            
             products_info = [{
                     'product_id' : product.category_id,
                     'name' : product.name,
