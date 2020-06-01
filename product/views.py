@@ -9,6 +9,22 @@ from product.models   import (
 
 from django.shortcuts import render
 
+
+class MainView(View):
+    def get(self, request):
+        products = Product.objects.all()[0:6]    # 프로덕트 중에서 6개만 뽑음
+
+        data = [{
+            'product_id' : product.category_id,
+            'name' : product.name,
+            'unit_price_comment' : product.unit_price_comment,
+            'sales_price_comment' : product.sales_price_comment,
+            'sub_img_url' : product.sub_img_url
+            } for product in products]
+        
+        return JsonResponse({'data' : data}, status=200)
+        
+
 class CategoryView(View):
     def get(self, request, category_id):
 

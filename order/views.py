@@ -9,7 +9,6 @@ from product.models   import (
 from order.models     import Cart, CartItem, Order, OrderStatus, PaymentMethod
 
 
-
 class CartView(View):
     
     #@login_decorator
@@ -17,8 +16,8 @@ class CartView(View):
         try:
             data = json.loads(request.body)
 
-            cart = Cart.objects.filter(customer_id=request.customer.id).last()
-            cart_items = CartItem.objects.filter(cart_id=cart.id, prodcut_id=data['product_id'])
+            cart = Cart.objects.filter(customer_id=data['customer_id']).last()
+            cart_items = CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id'])
 
             if cart_items.exists():
                 cart_items.update(
@@ -32,7 +31,7 @@ class CartView(View):
                 CartItem(
                     cart_id = cart.id,
                     product_id = data['product_id'],
-                    selected_option_id = data['quantity'],
+                    selected_option_id = data['selected_option_id'],
                     quantity = data['quantity']
                 ).save()
 
@@ -42,20 +41,20 @@ class CartView(View):
 
     #@login_decorator
     def get(self, request):
-        cart = Cart.objects.filter(customer_id=request.customer.id).last()
-        cart_items = CartItem.objects.get(cart_id=cart.id).cartitem_set.all()
+        cart = Cart.objects.filter(customer_id=request.GET.get('customer_id')).last()
+        cart_items = CartItem.objects.filter(cart_id=cart.id)
 
         data = [
             {
-                'name' : Proudct.objects.get(id=cart.product_id).name,
-                'sub_img_url' : Proudct.objects.get(id=cart.product_id).sub_img_url,
-                'selected_option' : OptionItems.objects.get(id=cart_item.option_id).name,
-                'sales_price' : Proudct.objects.get(id=cart.product_id).sales_price,
+                'name' : Product.objects.get(id=cart_item.product_id).name,
+                'sub_img_url' : Product.objects.get(id=cart_item.product_id).sub_img_url,
+                'selected_option' : OptionItems.objects.get(id=cart_item.selected_option_id).name,
+                'sales_price' : Product.objects.get(id=cart_item.product_id).sales_price,
                 'quantity' : cart_item.quantity
             } for cart_item in cart_items
         ]
 
-        return JsonResponse({'data' : list(data), status =200)
+        return JsonResponse({'data' : list(data)}, status=200)
 
     #@login_decorator
     def delete(self, request):
