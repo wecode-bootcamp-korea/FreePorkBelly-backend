@@ -50,10 +50,10 @@ class CartView(View):
 
         data = [
             {
-                'name' : Product.objects.get(id=cart_item.product_id).name,
-                'sub_img_url' : Product.objects.get(id=cart_item.product_id).sub_img_url,
+                'name' : cart_item.product.name,
+                'sub_img_url' : cart_item.product.sub_img_url,
                 'selected_option' : OptionItems.objects.get(id=cart_item.selected_option_id).name,
-                'sales_price' : Product.objects.get(id=cart_item.product_id).sales_price,
+                'sales_price' : cart_item.product.sales_price,
                 'quantity' : cart_item.quantity
             } for cart_item in cart_items
         ]
