@@ -9,7 +9,6 @@ from product.models   import (
 from order.models     import Cart, CartItem, Order, OrderStatus, PaymentMethod
 
 
-
 class CartView(View):
     
     #@login_decorator
@@ -17,8 +16,12 @@ class CartView(View):
         try:
             data = json.loads(request.body)
 
-            cart = Cart.objects.filter(customer_id=request.customer.id).last()
-            cart_items = CartItem.objects.filter(cart_id=cart.id, prodcut_id=data['product_id'])
+            if Cart.objects.filter(customer_id=data['customer_id']).exists():       # 해당 ID의 카트가 존재하면, 그거 가져옴
+                cart = Cart.objects.filter(customer_id=data['customer_id']).last()
+            else:
+                cart = Cart.objects.create(customer_id=data['customer_id'])             # 없으면 카트를 신규로 생성
+
+            cart_items = CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id'])
 
             if cart_items.exists():
                 cart_items.update(
@@ -32,7 +35,7 @@ class CartView(View):
                 CartItem(
                     cart_id = cart.id,
                     product_id = data['product_id'],
-                    selected_option_id = data['quantity'],
+                    selected_option_id = data['selected_option_id'],
                     quantity = data['quantity']
                 ).save()
 
@@ -42,27 +45,27 @@ class CartView(View):
 
     #@login_decorator
     def get(self, request):
-        cart = Cart.objects.filter(customer_id=request.customer.id).last()
-        cart_items = CartItem.objects.get(cart_id=cart.id).cartitem_set.all()
+        cart = Cart.objects.filter(customer_id=request.GET.get('customer_id')).last()
+        cart_items = CartItem.objects.filter(cart_id=cart.id)
 
         data = [
             {
-                'name' : Proudct.objects.get(id=cart.product_id).name,
-                'sub_img_url' : Proudct.objects.get(id=cart.product_id).sub_img_url,
-                'selected_option' : OptionItems.objects.get(id=cart_item.option_id).name,
-                'sales_price' : Proudct.objects.get(id=cart.product_id).sales_price,
+                'name' : cart_item.product.name,
+                'sub_img_url' : cart_item.product.sub_img_url,
+                'selected_option' : OptionItems.objects.get(id=cart_item.selected_option_id).name,
+                'sales_price' : cart_item.product.sales_price,
                 'quantity' : cart_item.quantity
             } for cart_item in cart_items
         ]
 
-        return JsonResponse({'data' : list(data), status =200)
+        return JsonResponse({'data' : list(data)}, status=200)
 
     #@login_decorator
     def delete(self, request):
         data = json.loads(request.body)
-        cart = Cart.objects.filter(customer_id=request.customer.id).last()
-
-        CartItems.objects.filter(cart_id=cart.id, product_id=data['product_id']).delete()
+        
+        cart = Cart.objects.filter(customer_id=data['customer_id']).last()
+        CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id']).delete()
 
         return HttpResponse(status=200)
         

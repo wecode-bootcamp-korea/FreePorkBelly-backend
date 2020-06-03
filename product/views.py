@@ -9,6 +9,24 @@ from product.models   import (
 
 from django.shortcuts import render
 
+
+class MainView(View):
+    def get(self, request):
+        
+        PRODUCT_MAIN_LIMIT = request.GET.get('product_limit', 6)              # 메인페이지에 6개 상품만 보여줌
+        products = Product.objects.all()[:PRODUCT_MAIN_LIMIT]
+
+        data = [{
+            'product_id' : product.category_id,
+            'name' : product.name,
+            'unit_price_comment' : product.unit_price_comment,
+            'sales_price_comment' : product.sales_price_comment,
+            'sub_img_url' : product.sub_img_url
+            } for product in products]
+        
+        return JsonResponse({'data' : data}, status=200)
+        
+
 class CategoryView(View):
     def get(self, request, category_id):
 
@@ -29,7 +47,7 @@ class CategoryView(View):
                     'name' : category.name,
                     'image_url' : category.image_url
                 }
-            # product_info는 좀 수정이 필요해 보임.
+            
             products_info = [{
                     'product_id' : product.category_id,
                     'name' : product.name,

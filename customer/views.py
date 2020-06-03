@@ -4,17 +4,17 @@ import jwt
 
 from django.views import View
 from django.http  import HttpResponse, JsonResponse
-#from django.db    import IntergrityError
-
 from .models      import Customer
 
-#import my_settings
 
 class SignUpView(View):
     def post(self, request):
         data = json.loads(request.body)
 
         try:
+            if Customer.objects.filter(email=data['email']).exists():
+                return JsonResponse({'message':'EMAIL_ALREADY_EXIST'}, status=400)
+
             hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             
             Customer.objects.create(
@@ -24,12 +24,8 @@ class SignUpView(View):
                 phone=data['phone']
             )
             return HttpResponse(status=200)
-        except TypeError:
-            return JsonResponse({'message':'INVALID INPUT'}, status=400)
         except KeyError:
             return JsonResponse({"message": "INVALID_KEYS"}, status=400)
-        # except IntegrityError:
-        #     return JsonResponse({'message':'Already registered email'}, status=400)
         
 
 class SignInView(View):
