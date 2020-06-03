@@ -12,8 +12,7 @@ from django.shortcuts import render
 
 class MainView(View):
     def get(self, request):
-        
-        PRODUCT_MAIN_LIMIT = request.GET.get('product_limit', 6)               # 메인페이지에 6개 상품만 보여줌
+        PRODUCT_MAIN_LIMIT = request.GET.get('product_limit', 6)           # 프론트엔드 요청 없을 시, 6개 상품 뿌려줌
         products = Product.objects.all()[:PRODUCT_MAIN_LIMIT]
 
         data = [{
