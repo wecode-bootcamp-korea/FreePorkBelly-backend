@@ -18,10 +18,10 @@ class SignUpView(View):
             hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             
             Customer.objects.create(
-                email=data['email'],
-                password=hashed_password.decode('utf-8'),
-                name=data['name'],
-                phone=data['phone']
+                email    = data['email'],
+                password = hashed_password.decode('utf-8'),
+                name     = data['name'],
+                phone    = data['phone']
             )
             return HttpResponse(status=200)
         except KeyError:
@@ -52,7 +52,7 @@ def login_decorator(func):
     def wrapper(self, request, *args, **kwargs):
         try:
             auth_token = request.headers.get('Authorization', None)
-            payload = jwt.decode(auth_token, 'secret', algorithm='HS256')
+            payload    = jwt.decode(auth_token, 'secret', algorithm='HS256')
             
             request.customer = Customer.objects.get(id=payload['customer_id'])
             return func(self, request, *args, **kwargs)
