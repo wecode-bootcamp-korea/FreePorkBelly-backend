@@ -16,10 +16,10 @@ class CartView(View):
         try:
             data = json.loads(request.body)
 
-            if Cart.objects.filter(customer_id=data['customer_id']).exists():       # 해당 ID의 카트가 존재하면, 그거 가져옴
-                cart = Cart.objects.filter(customer_id=data['customer_id']).last()
-            else:
-                cart = Cart.objects.create(customer_id=data['customer_id'])             # 없으면 카트를 신규로 생성
+            if Cart.objects.filter(customer_id=data['customer_id']).exists():       # 해당 고객의 카트가 존재하면 가져옴
+                cart = Cart.objects.get(customer_id=data['customer_id']
+            else:    # 해당 고객에게 카트가 없으면 카트를 신규로 생성하고, order_status_id를 부여
+                cart = Cart.objects.create(customer_id=data['customer_id'], order_status_id=1)
 
             cart_items = CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id'])
 
@@ -45,7 +45,7 @@ class CartView(View):
 
     #@login_decorator
     def get(self, request):
-        cart = Cart.objects.filter(customer_id=request.GET.get('customer_id')).last()
+        cart = Cart.objects.get(customer_id=request.GET.get('customer_id'))
         cart_items = CartItem.objects.filter(cart_id=cart.id)
 
         data = [
