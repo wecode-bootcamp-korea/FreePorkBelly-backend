@@ -17,9 +17,9 @@ class CartView(View):
             data = json.loads(request.body)
 
             if Cart.objects.filter(customer_id=data['customer_id']).exists():       # 해당 고객의 카트가 존재하면 가져옴
-                cart = Cart.objects.get(customer_id=data['customer_id']
+                cart = Cart.objects.get(customer_id=data['customer_id'])
             else:    # 해당 고객에게 카트가 없으면 카트를 신규로 생성하고, order_status_id를 부여
-                cart = Cart.objects.create(customer_id=data['customer_id'], order_status_id=1)
+                cart = Cart.objects.create(customer_id=data['customer_id'])
 
             cart_items = CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id'])
 
