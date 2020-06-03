@@ -27,11 +27,12 @@ class MainView(View):
         
 
 class CategoryView(View):
-    def get(self, request, category_id):
+    def get(self, request):
+        category_id = request.GET.get('category_id', None)
 
         try:
             
-            if category_id == 0:                  # 0일 때는 실행되나, category_id가 빈 값일 때는 에러 발생
+            if category_id is None:                  # 0일 때는 실행되나, category_id가 빈 값일 때는 에러 발생
                 category_info = {
                     'name' : "전체보기",
                     'image_url' : "https://www.jeongyookgak.com/assets/list/01.png"

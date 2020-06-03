@@ -52,10 +52,9 @@ def login_decorator(func):
     def wrapper(self, request, *args, **kwargs):
         try:
             auth_token = request.headers.get('Authorization', None)
-            #print('auth_token', auth_token)
             payload = jwt.decode(auth_token, 'secret', algorithm='HS256')
-            #print('payload', payload)
-            request.user = Customer.objects.get(id=payload['customer_id'])
+            
+            request.customer = Customer.objects.get(id=payload['customer_id'])
             return func(self, request, *args, **kwargs)
 
         except Customer.DoesNotExist:

@@ -31,6 +31,7 @@ class PaymentMethod(models.Model):
 
 class Cart(models.Model):
     customer   = models.ForeignKey('customer.Customer',on_delete=models.SET_NULL,null=True)
+    cart_status = models.ForeignKey('OrderStatus', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
