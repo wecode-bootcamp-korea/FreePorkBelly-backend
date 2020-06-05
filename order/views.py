@@ -3,6 +3,7 @@ from django.views     import View
 from django.http      import HttpResponse, JsonResponse
 from decimal          import Decimal
 import datetime
+import enum
 
 from customer.models  import Customer, DeliveryAddress
 from customer.views   import login_decorator
@@ -11,6 +12,13 @@ from product.models   import (
     Review, Option, OptionItems)
 from order.models     import Cart, CartItem, Order, OrderStatus, PaymentMethod
 
+class OrderStatusId(enum.Enum):
+    ActiveCart        = 1
+    AbortedCart       = 2
+    Order             = 3
+    Payment           = 4
+    Delivery          = 5
+    DeliveryCompleted = 6 
 
 class CartView(View):    
     @login_decorator
@@ -19,10 +27,10 @@ class CartView(View):
             data        = json.loads(request.body)
             customer_id = request.customer.id
 
-            if Cart.objects.filter(customer_id=customer_id).exists():       # 해당 고객의 카트가 존재하면 가져옴
-                cart = Cart.objects.get(customer_id=customer_id)
-            else: # 해당 고객에게 카트가 없으면 카트를 신규로 생성하고, order_status_id를 부여
-                cart = Cart.objects.create(customer_id=customer_id, cart_status_id=1)             
+            if Cart.objects.filter(customer_id=customer_id, cart_status_id=OrderStatusId.ActiveCart.value).exists():
+                cart = Cart.objects.get(customer_id=customer_id, cart_status_id=OrderStatusId.ActiveCart.value)
+            else: 
+                cart = Cart.objects.create(customer_id=customer_id, cart_status_id=OrderStatusId.ActiveCart.value)             
 
             cart_items = CartItem.objects.filter(cart_id=cart.id, product_id=data['product_id'])
 
@@ -49,7 +57,7 @@ class CartView(View):
         try:
             customer_id = request.customer.id
             
-            cart       = Cart.objects.get(customer_id=customer_id, cart_status_id=1)
+            cart       = Cart.objects.get(customer_id=customer_id, cart_status_id=OrderStatusId.ActiveCart.value)
             cart_items = CartItem.objects.select_related('product', 'selected_option').filter(cart_id=cart.id)
 
             total_amount = 0
@@ -104,7 +112,7 @@ class AddressView(View):
             data        = json.loads(request.body)
             customer_id = request.customer.id
 
-            # DeliverAddress 복수 등록 가능하게 Model 설계되었으나, 프론트와 연동 편의성 위해 1개만 등록. 이후에 업데이트되도록 로직 수정
+            # DeliverAddress 복수 등록 가능하게 Model 설계되었으나, 프론트와 연동 위해 1개만 등록되어 수정하도록 로직 수정
             if DeliveryAddress.objects.filter(customer_id=customer_id).exists():
                 DeliveryAddress.objects.filter(customer_id=customer_id).update(
                     name    = data['name'],
@@ -157,7 +165,7 @@ class OrderView(View):
             data        = json.loads(request.body)
             customer_id = request.customer.id
 
-            cart             = Cart.objects.get(customer_id=customer_id)
+            cart             = Cart.objects.get(customer_id=customer_id, cart_status_id=OrderStatusId.ActiveCart.value)
             delivery_address = DeliveryAddress.objects.get(customer_id=customer_id)
             expected_amount  = Decimal(data['expected_amount'])
 
@@ -167,12 +175,12 @@ class OrderView(View):
                 cart_id             = cart.id,
                 payment_amount      = expected_amount,        
                 payment_method_id   = 2,                           # 프론트엔드에서 무통장입금만 구현하여 무통장인 2번으로 부여
-                order_status_id     = 4,                             # 오더완료 시, status를 결제완료로 세팅
+                order_status_id     = OrderStatusId.Payment.value,                           # 오더완료 시, status를 결제완료로 세팅
                 delivery_address_id = delivery_address.id
             ).save()
 
-            # Cart Status를 주문완료로 변경한 후 Cart 객체 삭제 -> 장바구니에 가면 비어있게 됨
-            cart.cart_status_id = 3
+            # Cart Status를 주문완료로 변경한 후 Cart 객체 삭제 -> 장바구니에 가면 비게 됨
+            cart.cart_status_id = OrderStatusId.Order.value
             cart.save()
 
             return HttpResponse(status=200)

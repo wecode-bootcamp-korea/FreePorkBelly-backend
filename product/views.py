@@ -12,7 +12,7 @@ from django.shortcuts import render
 
 class MainView(View):
     def get(self, request):
-        PRODUCT_MAIN_LIMIT = request.GET.get('product_limit', 6)           # 프론트엔드 요청 없을 시, 6개 상품 뿌려줌
+        PRODUCT_MAIN_LIMIT = request.GET.get('product_limit', 6)         # 프론트엔드 요청 없을 시, 6개 상품 뿌려줌
         products           = Product.objects.all()[:PRODUCT_MAIN_LIMIT]
 
         data = [{
@@ -32,7 +32,7 @@ class CategoryView(View):
 
         try:
             
-            if category_id is None:                  # 0일 때는 실행되나, category_id가 빈 값일 때는 에러 발생
+            if category_id is None:
                 category_info = {
                     'name'      : "전체보기",
                     'image_url' : "https://www.jeongyookgak.com/assets/list/01.png"
@@ -78,6 +78,7 @@ class ProductView(View):
             desc_img_list = [ desc_img.img_url for desc_img in desc_imgs ]            
 
             product_detail = {
+                'product_id'          : product.id,
                 'name'                : product.name,
                 'unit_price_comment'  : product.unit_price_comment,
                 'unit_price'          : product.unit_price,
