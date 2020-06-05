@@ -97,3 +97,44 @@ class ProductView(View):
         
         except Product.DoesNotExist:
             return JsonResponse({'message' : "INVALID_PRODUCT_ID"})
+
+class ReviewView(View):
+    def post(self, request, product_id):
+        data = json.loads(request.body)
+        # 작성한 title body 담기
+        Review.objects.create(
+            title       = data['title'],
+            body        = data['body'],
+            customer_id = data['customer_id'],
+            product_id  = data['product_id'],
+        )
+        return HttpResponse(status=200)
+    # 예외상황이 없는것같아서 try 제외
+    # 특정상품에 대한 리뷰만 가져오기
+    def get(self, request, product_id):
+        
+        try:
+            review            = []
+            review_all        = Review.objects.filter(product_id = product_id).all() #.values("title","body")
+          # purchase_quantity = Review.objects.filter(customer_id = customer_id).count()
+          # print(review_all)
+
+            # 타이틀, 바디, 이름, 구매횟수, 구매한 상품이름, 리뷰날짜/// 사진은 없다
+            for element in review_all:
+                review.append({
+                    'customer_name' : element.customer.name,
+                    'product_name'  : element.product.name,
+                    'title'         : element.title,
+                    'comment'       : element.body,
+                    'order_amount'  : element.customer.order_set.filter(order_status_id=2).count(),
+                    'created_at'    : element.created_at,
+                })
+            '''
+            review.append({
+                'purchase_quantity' : purchase_quantity
+            })
+            '''
+            return JsonResponse({'review' : review})
+        except Review.DoesNotExist:
+            return JsonResponse({'message' : "INVALID_CATEGORY_ID"})
+
